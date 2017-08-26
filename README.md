@@ -1,1 +1,1 @@
-this is a server powered by express
+this is a web server powered by express
