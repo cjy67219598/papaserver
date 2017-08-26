@@ -24,20 +24,20 @@ app.use("/main", index);
 app.use("/users", users);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function(req, res, next) {//捕捉404错误，传递给下一个路由
   let err = new Error("Not Found");
   err.status = 404;
   next(err);
 });
-
 // error handler
 app.use(function(err, req, res, next) { //捕捉服务器错误（路由中的错误）
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {};
+  res.locals.error = err;
+  res.locals.title = "出错啦！";
   // render the error page
   res.status(err.status || 500);
-  res.render("error");
+  res.render("error");//返回错误信息至错误页面
 });
 
 module.exports = app;
