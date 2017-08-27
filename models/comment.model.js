@@ -1,6 +1,6 @@
 let mongoose = require("mongoose");
 let Schema = mongoose.Schema;
-let CommentSchema = new mongoose.Schema({
+let CommentSchema = new Schema({
     createTime:{
         type:String,
         default:function(){
@@ -27,4 +27,4 @@ let CommentSchema = new mongoose.Schema({
         ref:"User"
     }
 });
-mongoose.model("Comment",CommentSchema);
+module.exports = CommentSchema;

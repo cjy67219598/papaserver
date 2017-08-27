@@ -1,6 +1,6 @@
 let mongoose = require("mongoose");
 let Schema = mongoose.Schema;
-let UserSchema = new mongoose.Schema({
+let UserSchema = new Schema({
     username:{
         type:String,
         unique:true,
@@ -20,12 +20,12 @@ let UserSchema = new mongoose.Schema({
     nickname:{
         type:String,
         validate:function(data){
-            return data.length >= 1 && data.length <= 15
+            return data.length >= 1 && data.length <= 15;
         }
     },
     password:{
         type:String,
-        match:/^[a-zA-Z0-9_]{5,17}$///字母数字下划线长度6-18
+        match:/^[a-zA-Z0-9_]{5,17}$/
     },
     createTime:{
         type:String,
@@ -41,13 +41,13 @@ let UserSchema = new mongoose.Schema({
     introduction:{
         type:String
     },
-    articles:{
+    articles:[{
         type:Schema.Types.ObjectId,
         ref:"Article"
-    },
-    comments:{
+    }],
+    comments:[{
         type:Schema.Types.ObjectId,
         ref:"Comment"
-    }
+    }]
 });
-mongoose.model("User",UserSchema);
+module.exports = UserSchema;

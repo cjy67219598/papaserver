@@ -1,6 +1,6 @@
 let mongoose = require("mongoose");
 let Schema = mongoose.Schema;
-let ArticleSchema = new mongoose.Schema({
+let ArticleSchema = new Schema({
     title:{
         type:String,
         validate:function(e){
@@ -28,9 +28,9 @@ let ArticleSchema = new mongoose.Schema({
         type:Schema.Types.ObjectId,
         ref:"User"
     },
-    comments:{
+    comments:[{
         type:Schema.Types.ObjectId,
         ref:"Comment"
-    }
+    }]
 });
-mongoose.model("Article",ArticleSchema);
+module.exports = ArticleSchema;

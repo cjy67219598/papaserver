@@ -18,11 +18,9 @@ let server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 server.listen(port);
-//启动mongodb数据库
-let db = require("../models/config");
-db();
 server.on("error", onError);
 server.on("listening", onListening);
+console.log("服务启动 @port-" + port + " " + new Date().toLocaleString());
 /**
  * Normalize a port into a number, string, or false.
  */
@@ -43,7 +41,7 @@ function normalizePort(val) {
 /**
  * Event listener for HTTP server "error" event.
  */
-function onError(error) {   //处理服务器错误
+function onError(error) {
     if (error.syscall !== "listen") {
         throw error;
     }
