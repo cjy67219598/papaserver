@@ -7,6 +7,9 @@ let db = require("../models/config");
 let UserModel = db.model("User");
 let CommentModel = db.model("Comment");
 let ArticleModel = db.model("Article");
+let multer = require("multer");
+let path = require("path");
+let makeDir = require("./business/makeDir");
 
 router.get("/test1", (req, res, next) => {
     let user = new UserModel({
@@ -67,6 +70,37 @@ router.get("/test5",(req,res,next) => {
         if(err) return next(err);
         res.send(doc);
     });
+});
+
+let upload = multer({
+    // dest:"./upload/",
+    storage:multer.diskStorage({
+        //设置上传文件的保存路径,需手动创建文件夹
+        destination:(req,file,cb) => {
+            let dir = path.resolve("./upload/head");
+            makeDir(dir,(err) => {
+                cb(null,dir);
+            });
+        },
+        //给上传的文件重命名
+        filename:(req,file,cb) => {
+            cb(null,"test.png");
+        }
+    }),
+    limits:{
+        fileSize:1024 * 1024 * 5  //大小限制
+    },
+    fileFilter:(req,file,cb) => {  //过滤器
+        let mineType = file.mimetype;
+        if(/image/i.test(mineType)){
+            cb(null,true);
+        }else{
+            cb(new Error("the mineType is not allowed"));
+        }
+    }
+});
+router.post("/upload",upload.fields([{ name:"image", maxCount: 1}]),(req,res,next) => {
+    res.send("成功！");
 });
 
 module.exports = router;
