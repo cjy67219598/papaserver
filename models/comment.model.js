@@ -1,5 +1,18 @@
 let mongoose = require("mongoose");
 let Schema = mongoose.Schema;
+let GoodSchema = new Schema({
+    user:{
+        type:String,
+        unique:true,
+    },
+    createTime:{
+        type:String,
+        default:function(){
+            let a = new Date();
+            return a.getTime();
+        }
+    }
+});
 let CommentSchema = new Schema({
     createTime:{
         type:String,
@@ -14,10 +27,7 @@ let CommentSchema = new Schema({
             return e.length > 0 && e.length < 500;
         }
     },
-    good:{
-        type:Number,
-        default:0
-    },
+    good:[GoodSchema],
     article:{
         type:Schema.Types.ObjectId,
         ref:"Article"

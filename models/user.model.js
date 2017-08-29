@@ -36,7 +36,7 @@ let UserSchema = new Schema({
     },
     headImg:{
         type:String,
-        default:"/upload/default.jpg"
+        default:"/upload/head/default.jpg"
     },
     introduction:{
         type:String
@@ -48,6 +48,18 @@ let UserSchema = new Schema({
     comments:[{
         type:Schema.Types.ObjectId,
         ref:"Comment"
+    }],
+    followers:[{
+        type:Schema.Types.ObjectId,
+        ref:"User"
+    }],
+    following:[{
+        type:Schema.Types.ObjectId,
+        ref:"User"
+    }],
+    collections:[{
+        type:Schema.Types.ObjectId,
+        ref:"Article"
     }]
 });
 module.exports = UserSchema;

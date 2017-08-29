@@ -72,6 +72,9 @@ router.get("/test5",(req,res,next) => {
     });
 });
 
+
+
+
 let upload = multer({
     // dest:"./upload/",
     storage:multer.diskStorage({
@@ -95,12 +98,20 @@ let upload = multer({
         if(/image/i.test(mineType)){
             cb(null,true);
         }else{
-            cb(new Error("the mineType is not allowed"));
+            let err = new Error("the mineType is not allowed");
+            err.status = 400;
+            cb(err);
         }
     }
 });
 router.post("/upload",upload.fields([{ name:"image", maxCount: 1}]),(req,res,next) => {
-    res.send("成功！");
+    res.send(req.files["image"][0].filename);
+});
+
+router.get("/ip",(req,res,next) => {
+    res.send({
+        ip:req.ip
+    });
 });
 
 module.exports = router;
