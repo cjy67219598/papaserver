@@ -31,6 +31,10 @@ let ArticleSchema = new Schema({
             return a.getTime();
         }
     },
+    category:{
+        type:Number,
+        default:1
+    },
     counts:{
       type:Number,
       default:0
