@@ -20,7 +20,7 @@ let UserSchema = new Schema({
     nickname:{
         type:String,
         validate:function(data){
-            return data.length >= 1 && data.length <= 15;
+            return /.{1,15}/.test(data);
         }
     },
     password:{
