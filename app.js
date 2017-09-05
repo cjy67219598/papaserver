@@ -22,34 +22,36 @@ app.use(logger("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
-app.use("/", express.static(path.join(__dirname, "public")));
-
+app.use(express.static(path.join(__dirname, "public")));
+app.use((req,res,next) => {
+    res.setHeader("Access-Control-Allow-Origin","*");
+    next();
+});
 app.use("/test", test);
 app.use("/index", index);
 app.use("/users", users);
 
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {//捕捉404错误，传递给下一个路由
+app.use( (req, res, next) => {//捕捉404错误，传递给下一个路由
     let err = new Error("Not Found");
     err.status = 404;
     next(err);
 });
 // error handler
-app.use(function (err, req, res, next) { //捕捉服务器错误（路由中的错误）
-    console.log(err);
+app.use((err, req, res, next) => { //捕捉服务器错误（路由中的错误）
     // set locals, only providing error in development
     if (err.status === 200) {
         res.send({
-            mes:{
+            msg:{
                 result:err.message || "成功",
                 status:1
             }
         });
     }else if(err.status === 400){
         res.send({
-            mes:{
+            msg:{
                 result:err.message || "失败",
-                status:0
+                status:err.sta || 0
             }
         });
     }else if(err.status === 404){
@@ -60,8 +62,9 @@ app.use(function (err, req, res, next) { //捕捉服务器错误（路由中的�
         // render the error page
         res.render("error");//返回错误信息至错误页面
     }else{
+        console.log(err);
         res.send({
-            mes:{
+            msg:{
                 result:"系统异常",
                 status:0
             }

@@ -13,7 +13,7 @@ let UserSchema = new Schema({
     },
     email:{
       type:String,
-      validate:function(e){
+      validate(e){
           return /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/.test(e) && e.length < 30;
       }
     },
@@ -29,14 +29,20 @@ let UserSchema = new Schema({
     },
     createTime:{
         type:String,
-        default:function(){
+        default(){
+            let a = new Date();
+            return a.getTime();
+        }
+    },
+    updateTime:{
+        type:String,
+        default(){
             let a = new Date();
             return a.getTime();
         }
     },
     headImg:{
-        type:String,
-        default:"/upload/head/default.jpg"
+        type:String
     },
     introduction:{
         type:String

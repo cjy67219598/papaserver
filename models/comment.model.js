@@ -7,7 +7,7 @@ let GoodSchema = new Schema({
     },
     createTime:{
         type:String,
-        default:function(){
+        default(){
             let a = new Date();
             return a.getTime();
         }
@@ -16,14 +16,14 @@ let GoodSchema = new Schema({
 let CommentSchema = new Schema({
     createTime:{
         type:String,
-        default:function(){
+        default(){
             let a = new Date();
             return a.getTime();
         }
     },
     content:{
         type:String,
-        validate:function(e){
+        validate(e){
             return e.length > 0 && e.length < 500;
         }
     },

@@ -3,13 +3,13 @@ let Schema = mongoose.Schema;
 let ArticleSchema = new Schema({
     title:{
         type:String,
-        validate:function(e){
+        validate(e){
             return e.length > 0 && e.length < 30;
         }
     },
     content:{
         type:String,
-        validate:function(e){
+        validate(e){
             return e.length > 0 && e.length < 10000;
         }
     },
@@ -19,14 +19,14 @@ let ArticleSchema = new Schema({
     },
     createTime:{
         type:String,
-        default:function(){
+        default(){
             let a = new Date();
             return a.getTime();
         }
     },
     updateTime:{
         type:String,
-        default:function(){
+        default(){
             let a = new Date();
             return a.getTime();
         }
