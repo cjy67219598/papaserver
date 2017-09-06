@@ -23,10 +23,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-app.use((req,res,next) => {
+app.use("/upload",express.static(path.join(__dirname, "upload")));
+app.use(express.static(path.join(__dirname, "../papachen")));  //前端项目开发环境
+/*app.use((req,res,next) => {
     res.setHeader("Access-Control-Allow-Origin","*");
     next();
-});
+});*/
 app.use("/test", test);
 app.use("/index", index);
 app.use("/users", users);
@@ -45,7 +47,8 @@ app.use((err, req, res, next) => { //捕捉服务器错误（路由中的错误�
             msg:{
                 result:err.message || "成功",
                 status:1
-            }
+            },
+            data:err.data || null
         });
     }else if(err.status === 400){
         res.send({

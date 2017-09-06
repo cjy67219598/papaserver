@@ -6,15 +6,12 @@ let CommentModel = db.model("Comment");
 let ArticleModel = db.model("Article");
 let multer = require("multer");
 let path = require("path");
-let makeDir = require("./business/makeDir");
-
-function isLogin(req, res, next) {
-
-}
+let makeDir = require("./utils/makeDir");
+let isLogin = require("./utils/isLogin");
 
 /* GET users listing. */
 
-router.post("/register",(req,res,next) => {
+router.post("/register",(req,res,next) => {//用户注册
     let user = new UserModel({
         username:req.body.username,
         tel:req.body.tel,
@@ -39,19 +36,136 @@ router.post("/register",(req,res,next) => {
         }
     });
 });
-router.post("/exist",(req,res,next) => {
+router.post("/exist",(req,res,next) => {//检查用户名是否存在
     UserModel.find({username:req.body.username},(err,doc) => {
-        if(err) return next(err);
-        if(doc.length !== 0){
-            err = new Error("用户名已存在!");
-            err.status = 400;
-            next(err);
-        }else{
-            err = new Error("恭喜您，用户名可用！");
-            err.status = 200;
+        try{
+            if(err) return next(err);
+            if(doc.length !== 0){
+                err = new Error("用户名已存在!");
+                err.status = 400;
+                next(err);
+            }else{
+                err = new Error("恭喜您，用户名可用！");
+                err.status = 200;
+                next(err);
+            }
+        }catch(err){
+
+        }
+    });
+});
+router.post("/login",(req,res,next) => {//用户登录
+    UserModel.findOne({username:req.body.username},(err,doc) => {
+        try{
+            if(err) return next(err);
+            if(!doc){
+                err = new Error("用户名不存在！");
+                err.status = 400;
+                return next(err);
+            }
+            if(doc.password === req.body.password){
+                res.cookie("username",doc.username,{
+                    expires:0,
+                    httpOnly: true
+                });
+                res.cookie("password",doc.password,{
+                    expires:0,
+                    httpOnly: true
+                });
+                err = new Error("登陆成功！");
+                err.status = 200;
+                next(err);
+            }else{
+                err = new Error("密码错误！");
+                err.status = 400;
+                next(err);
+            }
+        }catch(err){
             next(err);
         }
     });
 });
+router.post("/isLogin",(req,res,next) => {
+    if(req.cookies.username && req.cookies.password){
+        UserModel.findOne({username:req.cookies.username},(err,doc) => {
+            try{
+                if(err) return next(err);
+                if(!doc){
+                    err = new Error("登录信息不存在！");
+                    err.status = 400;
+                    return next(err);
+                }
+                if(doc.password === req.cookies.password){
+                    err = new Error("登陆成功！");
+                    err.status = 200;
+                    err.data = {
+                        nickname:doc.nickname,
+                        headImg:doc.headImg,
+                        tel:doc.tel,
+                        email:doc.email
+                    }
+                    next(err);
+                }else{
+                    err = new Error("登录信息不存在！");
+                    err.status = 400;
+                    next(err);
+                }
+            }catch(err){
+                next(err);
+            }
+        });
+    }else{
+        let err = new Error("用户尚未登陆！");
+        err.status = 400;
+        next(err);
+    }
+});
 
+//头像上传
+let upload = multer({
+    storage:multer.diskStorage({
+        //设置上传文件的保存路径,需手动创建文件夹
+        destination:(req,file,cb) => {
+            let dir = path.resolve("./upload/head/" + req.cookies.username);
+            makeDir(dir,(err) => {
+                cb(null,dir);
+            });
+        },
+        //给上传的文件重命名
+        filename:(req,file,cb) => {
+            cb(null,req.cookies.username + /\.[^\.]+$/.exec(file.originalname));
+        }
+    }),
+    limits:{
+        fileSize:1024 * 1024 * 5  //大小限制
+    },
+    fileFilter:(req,file,cb) => {  //过滤器
+        let mineType = file.mimetype;
+        if(/image/i.test(mineType)){
+            cb(null,true);
+        }else{
+            let err = new Error("the mineType is not allowed");
+            err.status = 400;
+            cb(err);
+        }
+    }
+});
+router.post("/upload",isLogin,upload.fields([{ name:"image", maxCount: 1}]),(req,res,next) => {
+    UserModel.findOne({username:req.cookies.username},(err,doc) => {
+        try{
+            if(err) return next(err);
+            console.log(req.files["image"][0]);
+            doc.headImg = "/upload/head/" + req.cookies.username + "/" + req.files["image"][0].filename;
+            doc.updateTime = Date.now();
+            doc.save(err => {
+                if(err) return next(err);
+                err = new Error("头像上传成功！");
+                err.status = 200;
+                next(err);
+            });
+        }catch(err){
+            next(err);
+        }
+    });
+});
 module.exports = router;

@@ -9,7 +9,7 @@ let CommentModel = db.model("Comment");
 let ArticleModel = db.model("Article");
 let multer = require("multer");
 let path = require("path");
-let makeDir = require("./business/makeDir");
+let makeDir = require("./utils/makeDir");
 
 router.get("/test1", (req, res, next) => {
     let user = new UserModel({
