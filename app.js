@@ -24,7 +24,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/upload",express.static(path.join(__dirname, "upload")));
-app.use(express.static(path.join(__dirname, "../papachen")));  //前端项目开发环境
+app.use(express.static("/papachen",path.join(__dirname, "../papachen")));  //前端项目开发环境
 /*app.use((req,res,next) => {
     res.setHeader("Access-Control-Allow-Origin","*");
     next();
