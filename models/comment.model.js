@@ -1,18 +1,5 @@
 let mongoose = require("mongoose");
 let Schema = mongoose.Schema;
-let GoodSchema = new Schema({
-    user: {
-        type: String,
-        unique: true,
-    },
-    createTime: {
-        type: String,
-        default() {
-            let a = new Date();
-            return a.getTime();
-        }
-    }
-});
 let CommentSchema = new Schema({
     createTime: {
         type: String,
@@ -31,7 +18,10 @@ let CommentSchema = new Schema({
         type:Boolean,
         default:false
     },
-    good: [GoodSchema],
+    good: {
+        type:Number,
+        default:0
+    },
     article: {
         type: Schema.Types.ObjectId,
         ref: "Article"

@@ -154,7 +154,6 @@ router.post("/upload",isLogin,upload.fields([{ name:"image", maxCount: 1}]),(req
     UserModel.findOne({username:req.cookies.username},(err,doc) => {
         try{
             if(err) return next(err);
-            console.log(req.files["image"][0]);
             doc.headImg = "/upload/head/" + req.cookies.username + "/" + req.files["image"][0].filename;
             doc.updateTime = Date.now();
             doc.save(err => {
@@ -168,4 +167,5 @@ router.post("/upload",isLogin,upload.fields([{ name:"image", maxCount: 1}]),(req
         }
     });
 });
+
 module.exports = router;

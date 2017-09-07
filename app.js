@@ -10,6 +10,7 @@ let db = require("./models/config");
 let test = require("./routes/test");
 let index = require("./routes/index");
 let users = require("./routes/users");
+let article = require("./routes/article");
 
 let app = express();
 // view engine setup
@@ -18,20 +19,29 @@ app.set("view engine", "jade");
 
 // uncomment after placing your favicon in /public
 app.use(favicon(path.join(__dirname, "public", "favicon.png")));
-app.use(logger("dev"));
+app.use(logger(function (tokens, req, res) { //控制台日志打印
+    return [
+        tokens.method(req, res),
+        tokens.url(req, res),
+        tokens.status(req, res),
+        tokens.res(req, res, "content-length"),"-",
+        tokens["response-time"](req, res), "ms"
+    ].join(" ")
+}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/upload",express.static(path.join(__dirname, "upload")));
 app.use("/papachen",express.static(path.join(__dirname, "../papachen")));  //前端项目开发环境
-/*app.use((req,res,next) => {
+/*app.use((req,res,next) => {//跨域
     res.setHeader("Access-Control-Allow-Origin","*");
     next();
 });*/
 app.use("/test", test);
 app.use("/index", index);
 app.use("/users", users);
+app.use("/article", article);
 
 // catch 404 and forward to error handler
 app.use( (req, res, next) => {//捕捉404错误，传递给下一个路由
