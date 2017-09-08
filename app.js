@@ -58,7 +58,8 @@ app.use((err, req, res, next) => { //捕捉服务器错误（路由中的错误�
                 result:err.message || "成功",
                 status:1
             },
-            data:err.data || null
+            data:err.data || null,
+            page:err.page || null
         });
     }else if(err.status === 400){
         res.send({

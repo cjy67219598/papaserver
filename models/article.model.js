@@ -25,14 +25,14 @@ let ArticleSchema = new Schema({
         default: false
     },
     createTime: {
-        type: String,
+        type: Number,
         default() {
             let a = new Date();
             return a.getTime();
         }
     },
     updateTime: {
-        type: String,
+        type: Number,
         default() {
             let a = new Date();
             return a.getTime();

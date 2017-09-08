@@ -9,18 +9,22 @@ let dir = null;
 function makeDir(p,cb){
     try{
         if(!dir) dir = p;
-        fs.stat(p,function(err, stats){
-            if(err){
-                makeDir(path.resolve(p,"../"),cb);
-                lastPath = p;
-            }else{
-                if(dir !== p){
-                    fs.mkdir(lastPath,function(){
-                        makeDir(dir,cb);
-                    });
+        fs.stat(p,(err, stats) => {
+            try{
+                if(err){
+                    makeDir(path.resolve(p,"../"),cb);
+                    lastPath = p;
                 }else{
-                    cb();
+                    if(dir !== p){
+                        fs.mkdir(lastPath,() => {
+                            makeDir(dir,cb);
+                        });
+                    }else{
+                        cb();
+                    }
                 }
+            }catch(err){
+                cb(err);
             }
         });
     }catch(err){

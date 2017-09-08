@@ -8,6 +8,7 @@ let multer = require("multer");
 let path = require("path");
 let makeDir = require("./utils/makeDir");
 let isLogin = require("./utils/isLogin");
+let pageQuery = require("./utils/page");
 //头像上传
 let upload = multer({
     storage:multer.diskStorage({
@@ -71,9 +72,11 @@ router.post("/save",isLogin,(req,res,next) => {//保存&修改博客
                     doc.articles.push(article._id);
                     doc.save(err => {
                         if(err) return next(err);
-                        err = new Error("保存成功！");
-                        err.status = 200;
-                        next(err);
+                        let obj = {
+                          message:"保存成功！"
+                        };
+                        obj.status = 200;
+                        next(obj);
                     });
                 });
             }catch(err){
@@ -81,26 +84,41 @@ router.post("/save",isLogin,(req,res,next) => {//保存&修改博客
             }
         });
     }else{
-        ArticleModel.findOne({_id:req.body.id},(err,doc) => {
+        UserModel.findOne({username:req.cookies.username},(err,userDoc) => {
             try{
                 if(err) return next(err);
-                if(!doc){
-                    err = new Error("文章不存在！");
-                    err.status = 400;
-                    next(err);
-                }else{
-                    typeof req.body.title !== "undefined" && (doc.title = req.body.title);
-                    typeof req.body.content !== "undefined" && (doc.content = req.body.content);
-                    typeof req.body.intro !== "undefined" && (doc.intro = req.body.intro);
-                    typeof req.body.hidden !== "undefined" && (doc.hidden = req.body.hidden);
-                    typeof req.body.category !== "undefined" && (doc.category = req.body.category);
-                    doc.save(err => {
+                ArticleModel.findOne({_id:req.body.id}).exec((err,doc) => {
+                    try{
                         if(err) return next(err);
-                        err = new Error("修改成功！");
-                        err.status = 200;
+                        if(!doc){
+                            err = new Error("文章不存在！");
+                            err.status = 400;
+                            next(err);
+                        }else{
+                            if(doc.user === userDoc._id){
+                                typeof req.body.title !== "undefined" && (doc.title = req.body.title);
+                                typeof req.body.content !== "undefined" && (doc.content = req.body.content);
+                                typeof req.body.intro !== "undefined" && (doc.intro = req.body.intro);
+                                typeof req.body.hidden !== "undefined" && (doc.hidden = req.body.hidden);
+                                typeof req.body.category !== "undefined" && (doc.category = req.body.category);
+                                doc.save(err => {
+                                    if(err) return next(err);
+                                    let obj = {
+                                        message:"修改成功！"
+                                    };
+                                    obj.status = 200;
+                                    next(obj);
+                                });
+                            }else{
+                                err = new Error("用户与数据不匹配！");
+                                err.status = 400;
+                                next(err);
+                            }
+                        }
+                    }catch(err){
                         next(err);
-                    });
-                }
+                    }
+                });
             }catch(err){
                 next(err);
             }
@@ -109,13 +127,26 @@ router.post("/save",isLogin,(req,res,next) => {//保存&修改博客
 });
 
 router.post("/list",isLogin,(req,res,next) => { //获取本人博客列表
-    UserModel.findOne({username:req.cookies.username}).populate("articles").exec((err,doc) => {
+    let page = req.body.page || 1;
+    let size = Number(req.body.size || 10);
+    UserModel.findOne({username:req.cookies.username},(err,doc) => {
         try{
             if(err) return next(err);
-            err = new Error("成功！");
-            err.status = 200;
-            err.data = doc.articles;
-            next(err);
+            let query = {
+                user:doc._id
+            };
+            req.body.title && (query.title = req.body.title);
+            let obj = {
+                message:"成功！"
+            };
+            obj.status = 200;
+            pageQuery.normal(page,size,ArticleModel,"",query,{}).then(arr => {
+                obj.page = arr[0];
+                obj.data = arr[1];
+                next(obj);
+            }).catch(err => {
+                next(err);
+            });
         }catch(err){
             next(err);
         }

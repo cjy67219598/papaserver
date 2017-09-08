@@ -30,9 +30,11 @@ router.post("/register",(req,res,next) => {//用户注册
                 next(err);
             }
         }else{
-            err = new Error("注册成功！");
-            err.status = 200;
-            next(err);
+            let obj = {
+              message:"注册成功！"
+            };
+            obj.status = 200;
+            next(obj);
         }
     });
 });
@@ -45,9 +47,11 @@ router.post("/exist",(req,res,next) => {//检查用户名是否存在
                 err.status = 400;
                 next(err);
             }else{
-                err = new Error("恭喜您，用户名可用！");
-                err.status = 200;
-                next(err);
+                let obj = {
+                  message:"恭喜您，用户名可用！"
+                };
+                obj.status = 200;
+                next(obj);
             }
         }catch(err){
 
@@ -72,9 +76,11 @@ router.post("/login",(req,res,next) => {//用户登录
                     expires:0,
                     httpOnly: true
                 });
-                err = new Error("登陆成功！");
-                err.status = 200;
-                next(err);
+                let obj = {
+                  message:"登陆成功！"
+                };
+                obj.status = 200;
+                next(obj);
             }else{
                 err = new Error("密码错误！");
                 err.status = 400;
@@ -96,15 +102,17 @@ router.post("/isLogin",(req,res,next) => {
                     return next(err);
                 }
                 if(doc.password === req.cookies.password){
-                    err = new Error("登陆成功！");
-                    err.status = 200;
-                    err.data = {
+                    let obj = {
+                      message:"登陆成功！"
+                    };
+                    obj.status = 200;
+                    obj.data = {
                         nickname:doc.nickname,
                         headImg:doc.headImg,
                         tel:doc.tel,
                         email:doc.email
-                    }
-                    next(err);
+                    };
+                    next(obj);
                 }else{
                     err = new Error("登录信息不存在！");
                     err.status = 400;
@@ -158,9 +166,11 @@ router.post("/upload",isLogin,upload.fields([{ name:"image", maxCount: 1}]),(req
             doc.updateTime = Date.now();
             doc.save(err => {
                 if(err) return next(err);
-                err = new Error("头像上传成功！");
-                err.status = 200;
-                next(err);
+                let obj = {
+                  message:"头像上传成功！"
+                };
+                obj.status = 200;
+                next(obj);
             });
         }catch(err){
             next(err);

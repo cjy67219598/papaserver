@@ -28,14 +28,14 @@ let UserSchema = new Schema({
         match:/^[a-zA-Z0-9_]{5,17}$/
     },
     createTime:{
-        type:String,
+        type:Number,
         default(){
             let a = new Date();
             return a.getTime();
         }
     },
     updateTime:{
-        type:String,
+        type:Number,
         default(){
             let a = new Date();
             return a.getTime();

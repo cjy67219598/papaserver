@@ -2,7 +2,7 @@ let mongoose = require("mongoose");
 let Schema = mongoose.Schema;
 let CommentSchema = new Schema({
     createTime: {
-        type: String,
+        type: Number,
         default() {
             let a = new Date();
             return a.getTime();
