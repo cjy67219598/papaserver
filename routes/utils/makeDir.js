@@ -16,7 +16,8 @@ function makeDir(p,cb){
                     lastPath = p;
                 }else{
                     if(dir !== p){
-                        fs.mkdir(lastPath,() => {
+                        fs.mkdir(lastPath,(err) => {
+                            if(err) return cb(err);
                             makeDir(dir,cb);
                         });
                     }else{

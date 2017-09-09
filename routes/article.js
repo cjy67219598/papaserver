@@ -16,6 +16,7 @@ let upload = multer({
         destination:(req,file,cb) => {
             let dir = path.resolve("./upload/article/" + req.cookies.username);
             makeDir(dir,(err) => {
+                if(err) return cb(err);
                 cb(null,dir);
             });
         },
@@ -95,7 +96,7 @@ router.post("/save",isLogin,(req,res,next) => {//保存&修改博客
                             err.status = 400;
                             next(err);
                         }else{
-                            if(doc.user === userDoc._id){
+                            if(doc.user.toString() === userDoc._id.toString()){
                                 typeof req.body.title !== "undefined" && (doc.title = req.body.title);
                                 typeof req.body.content !== "undefined" && (doc.content = req.body.content);
                                 typeof req.body.intro !== "undefined" && (doc.intro = req.body.intro);
@@ -146,6 +147,43 @@ router.post("/list",isLogin,(req,res,next) => { //获取本人博客列表
                 next(obj);
             }).catch(err => {
                 next(err);
+            });
+        }catch(err){
+            next(err);
+        }
+    });
+});
+
+router.post("/del",isLogin,(req,res,next) => {
+    UserModel.findOne({username:req.cookies.username},(err,userDoc) => {
+        try{
+            if(err) return next(err);
+            ArticleModel.findOne({_id:req.body.id}).exec((err,doc) => {
+                try{
+                    if(err) return next(err);
+                    if(!doc){
+                        err = new Error("文章不存在！");
+                        err.status = 400;
+                        next(err);
+                    }else{
+                        if(doc.user.toString() === userDoc._id.toString()){
+                            doc.remove(err => {
+                                if(err) return next(err);
+                                let obj = {
+                                    message:"删除成功！"
+                                };
+                                obj.status = 200;
+                                next(obj);
+                            });
+                        }else{
+                            err = new Error("用户与数据不匹配！");
+                            err.status = 400;
+                            next(err);
+                        }
+                    }
+                }catch(err){
+                    next(err);
+                }
             });
         }catch(err){
             next(err);

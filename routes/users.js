@@ -136,6 +136,7 @@ let upload = multer({
         destination:(req,file,cb) => {
             let dir = path.resolve("./upload/head/" + req.cookies.username);
             makeDir(dir,(err) => {
+                if(err) return cb(err);
                 cb(null,dir);
             });
         },

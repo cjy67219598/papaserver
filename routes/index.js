@@ -19,4 +19,6 @@ router.post("/detail", (req, res, next) => {
     });
 });
 
+router.post();
+
 module.exports = router;
