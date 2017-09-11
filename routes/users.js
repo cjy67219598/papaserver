@@ -179,4 +179,34 @@ router.post("/upload",isLogin,upload.fields([{ name:"image", maxCount: 1}]),(req
     });
 });
 
+//修改资料
+router.post("/edit",isLogin,(req,res,next) => {
+    UserModel.findOne({username:req.cookies.username},(err,doc) => {
+        try{
+            if(err) return next(err);
+            typeof req.body.password !== "undefined" && (doc.password = req.body.password);
+            typeof req.body.tel !== "undefined" && (doc.tel = req.body.tel);
+            typeof req.body.email !== "undefined" && (doc.email = req.body.email);
+            typeof req.body.nickname !== "undefined" && (doc.nickname = req.body.nickname);
+            typeof req.body.introduction !== "undefined" && (doc.introduction = req.body.introduction);
+            doc.updateTime = Date.now();
+            doc.save(err => {
+                try{
+                    if(err) return next(err);
+                    let obj = {
+                        message:"修改成功！",
+                        status:200
+                    };
+                    next(obj);
+                }catch(err){
+                    next(err);
+                }
+            });
+        }catch(err){
+            next(err);
+        }
+    });
+});
+
+
 module.exports = router;
