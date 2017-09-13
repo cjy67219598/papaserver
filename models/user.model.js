@@ -19,9 +19,13 @@ let UserSchema = new Schema({
     },
     nickname:{
         type:String,
-        validate:function(data){
+        validate(data){
             return /.{1,15}/.test(data);
         }
+    },
+    sex:{
+        type:Number,
+        default:1
     },
     password:{
         type:String,
@@ -47,25 +51,9 @@ let UserSchema = new Schema({
     introduction:{
         type:String
     },
-    articles:[{
-        type:Schema.Types.ObjectId,
-        ref:"Article"
-    }],
-    comments:[{
-        type:Schema.Types.ObjectId,
-        ref:"Comment"
-    }],
-    followers:[{
-        type:Schema.Types.ObjectId,
-        ref:"User"
-    }],
     following:[{
         type:Schema.Types.ObjectId,
         ref:"User"
-    }],
-    collections:[{
-        type:Schema.Types.ObjectId,
-        ref:"Article"
     }]
 });
 module.exports = UserSchema;

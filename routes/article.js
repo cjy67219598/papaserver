@@ -71,15 +71,11 @@ router.post("/save",isLogin,(req,res,next) => {//保存&修改博客
                 });
                 article.save(err => {
                     if(err) return next(err);
-                    doc.articles.push(article._id);
-                    doc.save(err => {
-                        if(err) return next(err);
-                        let obj = {
-                          message:"保存成功！"
-                        };
-                        obj.status = 200;
-                        next(obj);
-                    });
+                    let obj = {
+                        message:"保存成功！"
+                    };
+                    obj.status = 200;
+                    next(obj);
                 });
             }catch(err){
                 next(err);
@@ -170,18 +166,11 @@ router.post("/del",isLogin,(req,res,next) => {
                         if(doc.user.toString() === userDoc._id.toString()){
                             doc.remove(err => {
                                 if(err) return next(err);
-                                UserModel.update({username:req.cookies.username},{$pull:{articles:mongoose.Types.ObjectId(req.body.id)}},err => {
-                                    try{
-                                        if(err) return next(err);
-                                        let obj = {
-                                            message:"删除成功！"
-                                        };
-                                        obj.status = 200;
-                                        next(obj);
-                                    }catch(err){
-                                        next(err);
-                                    }
-                                });
+                                let obj = {
+                                    message:"删除成功！"
+                                };
+                                obj.status = 200;
+                                next(obj);
                             });
                         }else{
                             err = new Error("用户与数据不匹配！");
@@ -203,33 +192,17 @@ router.post("/comment",isLogin,(req,res,next) => {
     UserModel.findOne({username:req.cookies.username},(err,doc) => {
         try{
             if(err) return next(err);
-            ArticleModel.findOne({_id:req.body.id},(err2,doc2) => {
-                try{
-                    if(err2) return next(err2);
-                    let comment = new CommentModel({
-                        content:req.body.content,
-                        article:req.body.id,
-                        user:doc._id
-                    });
-                    comment.save(err => {
-                        if(err) return next(err);
-                        doc.comments.push(comment._id);
-                        doc2.comments.push(comment._id);
-                        doc.save(err => {
-                            if(err) return next(err);
-                            doc2.save(err => {
-                                if(err) return next(err);
-                                let obj = {
-                                    message:"发表评论成功！",
-                                    status:200
-                                };
-                                next(obj);
-                            });
-                        });
-                    });
-                }catch(err2){
-                    next(err2);
-                }
+            let comment = new CommentModel({
+                content:req.body.content,
+                article:req.body.id,
+                user:doc._id
+            });
+            comment.save(err => {
+                if(err) return next(err);
+                next({
+                    message:"发表成功！",
+                    status:200
+                });
             });
         }catch(err){
             next(err);
@@ -238,42 +211,21 @@ router.post("/comment",isLogin,(req,res,next) => {
 });
 //删除评论
 router.post("/delComment",isLogin,(req,res,next) => {
-    UserModel.findOne({username:req.cookies.username},(err,doc) => {
+    CommentModel.findOne({_id:req.body.id},(err2,doc2) => {
         try{
-            if(err) return next(err);
-            CommentModel.findOne({_id:req.body.id},(err2,doc2) => {
-                try{
-                    if(err2) return next(err2);
-                    if(doc._id.toString() !== doc2.user.toString()){
-                        return next({
-                            message:"用户信息不匹配！",
-                            status:400
-                        });
-                    }
-                    ArticleModel.update({_id:doc2.article},{$pull:{comments:req.body.id}},err => {
-                        try{
-                            if(err) return next(err);
-                            UserModel.update({_id:doc._id},{$pull:{comments:req.body.id}},err => {
-                                try{
-                                     if(err) return next(err);
-                                     doc2.remove(err => {
-                                         if(err) return next(err);
-                                         next({
-                                             message:"删除成功！",
-                                             status:200
-                                         });
-                                     });
-                                }catch(err){
-                                    next(err);
-                                }
-                            });
-                        }catch(err){
-                            next(err);
-                        }
-                    });
-                }catch(err){
-                    next(err);
-                }
+            if(err2) return next(err2);
+            if(doc._id.toString() !== doc2.user.toString()){
+                return next({
+                    message:"用户信息不匹配！",
+                    status:400
+                });
+            }
+            doc2.remove(err => {
+                if(err) return next(err);
+                next({
+                    message:"删除成功！",
+                    status:200
+                });
             });
         }catch(err){
             next(err);

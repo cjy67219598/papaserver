@@ -9,15 +9,26 @@ let pageQuery = require("./utils/page");
 
 /* GET home page. */
 router.post("/detail", (req, res, next) => {
-    ArticleModel.findOne({_id: req.body.id}, (err, doc) => {
+    ArticleModel.findOne({_id: req.body.id}).populate({path:"user",select:["nickname"]}).exec((err, doc) => {
         try {
             if (err) return next(err);
-            let obj = {
-                message: "成功！",
-                status: 200,
-                data:doc
-            };
-            next(obj);
+            if(req.body.view){
+                doc.counts ++;
+                doc.save(err => {
+                    if(err) return next(err);
+                    next({
+                        message: "成功！",
+                        status: 200,
+                        data:doc
+                    });
+                });
+            }else{
+                next({
+                    message: "成功！",
+                    status: 200,
+                    data:doc
+                });
+            }
         }catch(err){
             next(err);
         }

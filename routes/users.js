@@ -18,7 +18,8 @@ router.post("/register",(req,res,next) => {//用户注册
         email:req.body.email,
         nickname:req.body.nickname,
         password:req.body.password,
-        introduction:req.body.introduction
+        introduction:req.body.introduction,
+        sex:req.body.sex
     });
     user.save(err => {
         if(err){
@@ -189,6 +190,7 @@ router.post("/edit",isLogin,(req,res,next) => {
             typeof req.body.email !== "undefined" && (doc.email = req.body.email);
             typeof req.body.nickname !== "undefined" && (doc.nickname = req.body.nickname);
             typeof req.body.introduction !== "undefined" && (doc.introduction = req.body.introduction);
+            typeof req.body.sex !== "undefined" && (doc.introduction = req.body.sex);
             doc.updateTime = Date.now();
             doc.save(err => {
                 try{

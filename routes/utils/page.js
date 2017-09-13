@@ -11,6 +11,7 @@ module.exports = {
                 if(err){
                     reject(err);
                 }else{
+                    o.totalPage = Math.ceil(count / size);
                     o.count = count;
                     resolve(o);
                 }
@@ -23,27 +24,6 @@ module.exports = {
                     resolve(doc);
                 }
             });
-        })]);
-    },
-    pop(page,size,arr){
-        let start = (page - 1) * size;
-        let o = {
-            page:page
-        };
-        return Promise.all([new Promise((resolve,reject) => {
-            try{
-                o.count = Math.ceil(arr.length / size);
-                resolve(o);
-            }catch(err){
-                reject(err);
-            }
-        }),new Promise((resolve,reject) => {
-            try{
-                let a = arr.slice(start,start + size);
-                resolve(a);
-            }catch(err){
-                reject(err);
-            }
         })]);
     }
 };

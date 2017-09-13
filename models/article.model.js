@@ -50,10 +50,6 @@ let ArticleSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "User"
     },
-    comments: [{
-        type: Schema.Types.ObjectId,
-        ref: "Comment"
-    }],
     collected: [{
         type: Schema.Types.ObjectId,
         ref: "User"
