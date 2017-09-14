@@ -36,18 +36,27 @@ router.post("/detail", (req, res, next) => {
 });
 
 router.post("/hot",(req,res,next) => {
-    ArticleModel.find({}).populate("user",["nickname"]).sort({counts:-1}).limit(20).exec((err,doc) => {
-        try{
-            if(err) return next(err);
-            let obj = {
-                message:"成功！",
-                status:200,
-                data:doc
-            };
-            next(obj);
-        }catch(err){
-            next(err);
-        }
+    let reg = new RegExp(req.body.keywords,"i");
+    let query = {
+        $or:[{
+            title:reg
+        },{
+            intro:reg
+        },{
+            content:reg
+        }]
+    };
+    let page = req.body.page || 1;
+    let size = Number(req.body.size || 20);
+    pageQuery.normal(page,size,ArticleModel,{path:"user",select:["nickname"]},query,{counts:-1}).then(arr => {
+        next({
+            message:"成功！",
+            status:200,
+            page:arr[0],
+            data:arr[1]
+        });
+    }).catch(err => {
+        next(err);
     });
 });
 
