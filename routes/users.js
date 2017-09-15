@@ -10,8 +10,8 @@ let makeDir = require("./utils/makeDir");
 let isLogin = require("./utils/isLogin");
 
 /* GET users listing. */
-
-router.post("/register",(req,res,next) => {//用户注册
+//用户注册
+router.post("/register",(req,res,next) => {
     let user = new UserModel({
         username:req.body.username,
         tel:req.body.tel,
@@ -39,7 +39,8 @@ router.post("/register",(req,res,next) => {//用户注册
         }
     });
 });
-router.post("/exist",(req,res,next) => {//检查用户名是否存在
+//检查用户名是否存在
+router.post("/exist",(req,res,next) => {
     UserModel.find({username:req.body.username},(err,doc) => {
         try{
             if(err) return next(err);
@@ -59,7 +60,8 @@ router.post("/exist",(req,res,next) => {//检查用户名是否存在
         }
     });
 });
-router.post("/login",(req,res,next) => {//用户登录
+//用户登录
+router.post("/login",(req,res,next) => {
     UserModel.findOne({username:req.body.username},(err,doc) => {
         try{
             if(err) return next(err);
@@ -209,6 +211,29 @@ router.post("/edit",isLogin,(req,res,next) => {
         }
     });
 });
+//收藏文章
+router.post("/collect",isLogin,(req,res,next) => {
+    async function a(){
+        try{
+            let userDoc = UserModel.findOne({username:req.cookies.username}).exec();
+            let articleDoc = ArticleModel.findOne({_id:req.body.id}).exec();
+            return [userDoc,articleDoc];
+        }catch(err){
 
+        }
+    }
+    a().then(arr => {
+        arr[1].collected.push(arr[0]._id);
+        arr[1].save(err => {
+            if(err) return next(err);
+            next({
+                message:"收藏成功！",
+                status:200
+            });
+        });
+    }).catch(err => {
+        next(err);
+    });
+});
 
 module.exports = router;

@@ -138,7 +138,7 @@ router.post("/list",isLogin,(req,res,next) => { //获取本人博客列表
                 message:"成功！"
             };
             obj.status = 200;
-            pageQuery.normal(page,size,ArticleModel,"",query,{}).then(arr => {
+            pageQuery.normal(page,size,{collected:0},ArticleModel,"",query,{}).then(arr => {
                 obj.page = arr[0];
                 obj.data = arr[1];
                 next(obj);

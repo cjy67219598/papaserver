@@ -9,7 +9,7 @@ let pageQuery = require("./utils/page");
 
 /* GET home page. */
 router.post("/detail", (req, res, next) => {
-    ArticleModel.findOne({_id: req.body.id}).populate({path:"user",select:["nickname"]}).exec((err, doc) => {
+    ArticleModel.findOne({_id: req.body.id}).select({collected:0}).populate({path:"user",select:["nickname"]}).exec((err, doc) => {
         try {
             if (err) return next(err);
             if(req.body.view){
@@ -48,7 +48,7 @@ router.post("/hot",(req,res,next) => {
     };
     let page = req.body.page || 1;
     let size = Number(req.body.size || 20);
-    pageQuery.normal(page,size,ArticleModel,{path:"user",select:["nickname"]},query,{counts:-1}).then(arr => {
+    pageQuery.normal(page,size,{collected:0},ArticleModel,{path:"user",select:["nickname"]},query,{counts:-1}).then(arr => {
         next({
             message:"成功！",
             status:200,
@@ -63,7 +63,7 @@ router.post("/hot",(req,res,next) => {
 router.post("/latest",(req,res,next) => {
     let page = req.body.page || 1;
     let size = Number(req.body.size || 10);
-    pageQuery.normal(page,size,ArticleModel,{path:"user",select:["nickname"]},{},{updateTime:-1}).then(arr => {
+    pageQuery.normal(page,size,{collected:0},ArticleModel,{path:"user",select:["nickname"]},{},{updateTime:-1}).then(arr => {
         next({
             message:"成功！",
             status:200,
