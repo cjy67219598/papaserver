@@ -58,65 +58,51 @@ router.post("/upload",isLogin,upload.fields([{ name:"image", maxCount: 1}]),(req
 
 router.post("/save",isLogin,(req,res,next) => {//保存&修改博客
     if(!req.body.id){
-        UserModel.findOne({username:req.cookies.username},(err,doc) => {
-            try{
-                if(err) return next(err);
-                let article = new ArticleModel({
-                    title:req.body.title,
-                    content:req.body.content,
-                    intro:req.body.intro,
-                    hidden:req.body.hidden,
-                    category:req.body.category,
-                    user:doc._id
-                });
-                article.save(err => {
-                    if(err) return next(err);
-                    let obj = {
-                        message:"保存成功！"
-                    };
-                    obj.status = 200;
-                    next(obj);
-                });
-            }catch(err){
-                next(err);
-            }
+        let article = new ArticleModel({
+            title:req.body.title,
+            content:req.body.content,
+            intro:req.body.intro,
+            hidden:req.body.hidden,
+            category:req.body.category,
+            user:req.user_id
+        });
+        article.save(err => {
+            if(err) return next(err);
+            let obj = {
+                message:"保存成功！"
+            };
+            obj.status = 200;
+            next(obj);
         });
     }else{
-        UserModel.findOne({username:req.cookies.username},(err,userDoc) => {
+        ArticleModel.findOne({_id:req.body.id}).exec((err,doc) => {
             try{
                 if(err) return next(err);
-                ArticleModel.findOne({_id:req.body.id}).exec((err,doc) => {
-                    try{
-                        if(err) return next(err);
-                        if(!doc){
-                            err = new Error("文章不存在！");
-                            err.status = 400;
-                            next(err);
-                        }else{
-                            if(doc.user.toString() === userDoc._id.toString()){
-                                typeof req.body.title !== "undefined" && (doc.title = req.body.title);
-                                typeof req.body.content !== "undefined" && (doc.content = req.body.content);
-                                typeof req.body.intro !== "undefined" && (doc.intro = req.body.intro);
-                                typeof req.body.hidden !== "undefined" && (doc.hidden = req.body.hidden);
-                                typeof req.body.category !== "undefined" && (doc.category = req.body.category);
-                                doc.save(err => {
-                                    if(err) return next(err);
-                                    let obj = {
-                                        message:"修改成功！"
-                                    };
-                                    obj.status = 200;
-                                    next(obj);
-                                });
-                            }else{
-                                err = new Error("用户与数据不匹配！");
-                                err.status = 400;
-                                next(err);
-                            }
-                        }
-                    }catch(err){
+                if(!doc){
+                    err = new Error("文章不存在！");
+                    err.status = 400;
+                    next(err);
+                }else{
+                    if(doc.user.toString() === req.user_id.toString()){
+                        typeof req.body.title !== "undefined" && (doc.title = req.body.title);
+                        typeof req.body.content !== "undefined" && (doc.content = req.body.content);
+                        typeof req.body.intro !== "undefined" && (doc.intro = req.body.intro);
+                        typeof req.body.hidden !== "undefined" && (doc.hidden = req.body.hidden);
+                        typeof req.body.category !== "undefined" && (doc.category = req.body.category);
+                        doc.save(err => {
+                            if(err) return next(err);
+                            let obj = {
+                                message:"修改成功！"
+                            };
+                            obj.status = 200;
+                            next(obj);
+                        });
+                    }else{
+                        err = new Error("用户与数据不匹配！");
+                        err.status = 400;
                         next(err);
                     }
-                });
+                }
             }catch(err){
                 next(err);
             }
@@ -127,27 +113,27 @@ router.post("/save",isLogin,(req,res,next) => {//保存&修改博客
 router.post("/list",isLogin,(req,res,next) => { //获取本人博客列表
     let page = req.body.page || 1;
     let size = Number(req.body.size || 10);
-    UserModel.findOne({username:req.cookies.username},(err,doc) => {
-        try{
-            if(err) return next(err);
-            let query = {
-                user:doc._id
-            };
-            req.body.title && (query.title = req.body.title);
-            let obj = {
-                message:"成功！"
-            };
-            obj.status = 200;
-            pageQuery.normal(page,size,{collected:0},ArticleModel,"",query,{}).then(arr => {
-                obj.page = arr[0];
-                obj.data = arr[1];
-                next(obj);
-            }).catch(err => {
-                next(err);
-            });
-        }catch(err){
-            next(err);
-        }
+    let reg = new RegExp(req.body.keywords,"i");
+    let query = {
+        user:req.user_id,
+        $or:[{
+            title:reg
+        },{
+            intro:reg
+        },{
+            content:reg
+        }]
+    };
+    let obj = {
+        message:"成功！"
+    };
+    obj.status = 200;
+    pageQuery.normal(page,size,{collected:0},ArticleModel,"",query,{}).then(arr => {
+        obj.page = arr[0];
+        obj.data = arr[1];
+        next(obj);
+    }).catch(err => {
+        next(err);
     });
 });
 

@@ -73,11 +73,13 @@ router.post("/login",(req,res,next) => {
             if(doc.password === req.body.password){
                 res.cookie("username",doc.username,{
                     expires:0,
-                    httpOnly: true
+                    httpOnly: true,
+                    path:"/"
                 });
                 res.cookie("password",doc.password,{
                     expires:0,
-                    httpOnly: true
+                    httpOnly: true,
+                    path:"/"
                 });
                 let obj = {
                   message:"登陆成功！"
@@ -94,6 +96,16 @@ router.post("/login",(req,res,next) => {
         }
     });
 });
+//退出登陆
+router.post("/signOut",(req,res,next) => {
+    res.clearCookie("username",{path:"/"});
+    res.clearCookie("password",{path:"/"});
+    next({
+        message:"退出成功！",
+        status:200
+    });
+});
+//检查登陆
 router.post("/isLogin",(req,res,next) => {
     if(req.cookies.username && req.cookies.password){
         UserModel.findOne({username:req.cookies.username},(err,doc) => {
@@ -215,25 +227,94 @@ router.post("/edit",isLogin,(req,res,next) => {
 router.post("/collect",isLogin,(req,res,next) => {
     async function a(){
         try{
-            let userDoc = UserModel.findOne({username:req.cookies.username}).exec();
-            let articleDoc = ArticleModel.findOne({_id:req.body.id}).exec();
-            return [userDoc,articleDoc];
+            let articleDoc = await ArticleModel.findOne({_id:req.body.id}).populate({
+                path:"collected",
+                match:{
+                    _id:{
+                        $all:[req.user_id]
+                    }
+                }
+            }).exec();
+            return articleDoc;
         }catch(err){
-
+            return err;
         }
     }
-    a().then(arr => {
-        arr[1].collected.push(arr[0]._id);
-        arr[1].save(err => {
-            if(err) return next(err);
-            next({
-                message:"收藏成功！",
-                status:200
+    a().then(o => {
+        if(!o){
+            return next({
+                message:"文章信息不存在！",
+                status:400
             });
-        });
+        }
+        if(o.collected.length){
+            ArticleModel.update({
+                _id:o._id
+            },{
+                $pull:{
+                    collected:req.user_id
+                }
+            },err => {
+                if(err) return next(err);
+                next({
+                    message:"取消成功！",
+                    status:200
+                });
+            });
+        }else{
+            o.collected.push(req.user_id);
+            o.save(err => {
+                if(err) return next(err);
+                next({
+                    message:"收藏成功！",
+                    status:200
+                });
+            });
+        }
     }).catch(err => {
         next(err);
     });
+});
+//是否收藏
+router.post("/isCollect",isLogin,(req,res,next) => {
+    async function a(){
+        try{
+            let articleDoc = await ArticleModel.findOne({_id:req.body.id}).populate({
+                path:"collected",
+                match:{
+                    _id:{
+                        $all:[req.user_id]
+                    }
+                }
+            }).exec();
+            return articleDoc;
+        }catch(err){
+            return err;
+        }
+    }
+    a().then(o => {
+        if(!o){
+            return next({
+                message:"文章信息不存在！",
+                status:400
+            });
+        }
+        if(o.collected.length){
+            next({
+                message:"已收藏",
+                status:200,
+                data:1
+            });
+        }else{
+            next({
+                message:"未收藏",
+                status:200,
+                data:0
+            });
+        }
+    }).catch(err => {
+        next(err);
+    })
 });
 
 module.exports = router;
