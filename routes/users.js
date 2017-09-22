@@ -6,8 +6,9 @@ let CommentModel = db.model("Comment");
 let ArticleModel = db.model("Article");
 let multer = require("multer");
 let path = require("path");
-let makeDir = require("./utils/makeDir");
+let MakeDir = require("./utils/makeDir");
 let isLogin = require("./utils/isLogin");
+let pageObj = require("./utils/page");
 
 /* GET users listing. */
 //用户注册
@@ -150,7 +151,7 @@ let upload = multer({
         //设置上传文件的保存路径,需手动创建文件夹
         destination:(req,file,cb) => {
             let dir = path.resolve("./upload/head/" + req.cookies.username);
-            makeDir(dir,(err) => {
+            new MakeDir(dir,(err) => {
                 if(err) return cb(err);
                 cb(null,dir);
             });
@@ -316,5 +317,34 @@ router.post("/isCollect",isLogin,(req,res,next) => {
         next(err);
     })
 });
+//用户收藏列表
+router.post("/collections",isLogin,(req,res,next) => {
+    let reg = new RegExp(req.body.keywords,"i");
+    let query = {
+        $or:[{
+            title:reg
+        },{
+            intro:reg
+        },{
+            content:reg
+        }],
+        collected:{
+            $all:[req.user_id]
+        }
+    };
+    let page = req.body.page || 1;
+    let size = Number(req.body.size || 20);
+    pageObj.normal(page,size,{collected:0},ArticleModel,{path:"user",select:["nickname"]},query,{}).then(arr => {
+        next({
+            message:"成功！",
+            status:200,
+            page:arr[0],
+            data:arr[1]
+        });
+    }).catch(err => {
+        next(err);
+    });
+});
+
 
 module.exports = router;

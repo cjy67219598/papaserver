@@ -9,7 +9,7 @@ let CommentModel = db.model("Comment");
 let ArticleModel = db.model("Article");
 let multer = require("multer");
 let path = require("path");
-let makeDir = require("./utils/makeDir");
+let MakeDir = require("./utils/makeDir");
 
 router.get("/test1", (req, res, next) => {
     let user = new UserModel({
@@ -81,7 +81,8 @@ let upload = multer({
         //设置上传文件的保存路径,需手动创建文件夹
         destination:(req,file,cb) => {
             let dir = path.resolve("./upload/head");
-            makeDir(dir,(err) => {
+            new MakeDir(dir,(err) => {
+                if(err) return cb(err);
                 cb(null,dir);
             });
         },

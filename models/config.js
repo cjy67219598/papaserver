@@ -12,9 +12,9 @@ db.once("open",() => {
     console.log("正在访问数据库...");
 });
 db.on("connected", () => {
-    console.log("数据库连接成功！");
+    console.log("数据库连接成功！ --" + new Date().toLocaleString());
 });
 db.on("disconnected", () => {
-    console.log("数据库连接中断！");
+    console.log("数据库连接中断！ --" + new Date().toLocaleString());
 });
 module.exports = db;

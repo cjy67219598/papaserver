@@ -7,7 +7,7 @@ let CommentModel = db.model("Comment");
 let ArticleModel = db.model("Article");
 let multer = require("multer");
 let path = require("path");
-let makeDir = require("./utils/makeDir");
+let MakeDir = require("./utils/makeDir");
 let isLogin = require("./utils/isLogin");
 let pageQuery = require("./utils/page");
 //头像上传
@@ -16,7 +16,7 @@ let upload = multer({
         //设置上传文件的保存路径,需手动创建文件夹
         destination:(req,file,cb) => {
             let dir = path.resolve("./upload/article/" + req.cookies.username);
-            makeDir(dir,(err) => {
+            new MakeDir(dir,(err) => {
                 if(err) return cb(err);
                 cb(null,dir);
             });
@@ -41,7 +41,8 @@ let upload = multer({
         }
     }
 });
-router.post("/upload",isLogin,upload.fields([{ name:"image", maxCount: 1}]),(req,res,next) => {//上传博客图片
+//上传博客图片
+router.post("/upload",isLogin,upload.fields([{ name:"image", maxCount: 1}]),(req,res,next) => {
     UserModel.findOne({username:req.cookies.username},(err,doc) => {
         try{
             if(err) return next(err);
@@ -55,8 +56,8 @@ router.post("/upload",isLogin,upload.fields([{ name:"image", maxCount: 1}]),(req
         }
     });
 });
-
-router.post("/save",isLogin,(req,res,next) => {//保存&修改博客
+//保存&修改博客
+router.post("/save",isLogin,(req,res,next) => {
     if(!req.body.id){
         let article = new ArticleModel({
             title:req.body.title,
@@ -109,8 +110,8 @@ router.post("/save",isLogin,(req,res,next) => {//保存&修改博客
         });
     }
 });
-
-router.post("/list",isLogin,(req,res,next) => { //获取本人博客列表
+//获取本人博客列表
+router.post("/list",isLogin,(req,res,next) => {
     let page = req.body.page || 1;
     let size = Number(req.body.size || 10);
     let reg = new RegExp(req.body.keywords,"i");
@@ -136,7 +137,7 @@ router.post("/list",isLogin,(req,res,next) => { //获取本人博客列表
         next(err);
     });
 });
-
+//删除博客
 router.post("/del",isLogin,(req,res,next) => {
     UserModel.findOne({username:req.cookies.username},(err,userDoc) => {
         try{
