@@ -176,32 +176,25 @@ router.post("/del",isLogin,(req,res,next) => {
 });
 //评论
 router.post("/comment",isLogin,(req,res,next) => {
-    UserModel.findOne({username:req.cookies.username},(err,doc) => {
-        try{
+        let comment = new CommentModel({
+            content:req.body.content,
+            article:req.body.id,
+            user:req.user_id
+        });
+        comment.save(err => {
             if(err) return next(err);
-            let comment = new CommentModel({
-                content:req.body.content,
-                article:req.body.id,
-                user:doc._id
+            next({
+                message:"发表成功！",
+                status:200
             });
-            comment.save(err => {
-                if(err) return next(err);
-                next({
-                    message:"发表成功！",
-                    status:200
-                });
-            });
-        }catch(err){
-            next(err);
-        }
-    });
+        });
 });
 //删除评论
 router.post("/delComment",isLogin,(req,res,next) => {
     CommentModel.findOne({_id:req.body.id},(err2,doc2) => {
         try{
             if(err2) return next(err2);
-            if(doc._id.toString() !== doc2.user.toString()){
+            if(req.user_id.toString() !== doc2.user.toString()){
                 return next({
                     message:"用户信息不匹配！",
                     status:400
@@ -219,5 +212,24 @@ router.post("/delComment",isLogin,(req,res,next) => {
         }
     });
 });
+//评论列表
+router.post("/comments",(req,res,next) => {
+    let query = {
+        user:req.body.id
+    };
+    let page = req.body.page || 1;
+    let size = Number(req.body.size || 20);
+    pageQuery.normal(page,size,{},CommentModel,{path:"user",select:["nickname"]},query,{createTime:-1}).then(arr => {
+        next({
+            message:"成功！",
+            status:200,
+            page:arr[0],
+            data:arr[1]
+        });
+    }).catch(err => {
+        next(err);
+    });
+});
+
 
 module.exports = router;
