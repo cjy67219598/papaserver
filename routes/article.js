@@ -215,11 +215,11 @@ router.post("/delComment",isLogin,(req,res,next) => {
 //评论列表
 router.post("/comments",(req,res,next) => {
     let query = {
-        user:req.body.id
+        article:req.body.id
     };
     let page = req.body.page || 1;
     let size = Number(req.body.size || 20);
-    pageQuery.normal(page,size,{},CommentModel,{path:"user",select:["nickname"]},query,{createTime:-1}).then(arr => {
+    pageQuery.normal(page,size,{},CommentModel,{path:"user",select:["nickname","headImg"]},query,{createTime:-1}).then(arr => {
         next({
             message:"成功！",
             status:200,
