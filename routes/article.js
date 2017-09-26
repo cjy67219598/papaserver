@@ -176,25 +176,35 @@ router.post("/del",isLogin,(req,res,next) => {
 });
 //评论
 router.post("/comment",isLogin,(req,res,next) => {
-        let comment = new CommentModel({
-            content:req.body.content,
-            article:req.body.id,
-            user:req.user_id
-        });
-        comment.save(err => {
+    ArticleModel.findOne({
+        _id:req.body.id
+    }).exec((err,doc) => {
+        try{
             if(err) return next(err);
-            next({
-                message:"发表成功！",
-                status:200
+            let comment = new CommentModel({
+                content:req.body.content,
+                article:req.body.id,
+                userBy:req.user_id,
+                user:doc.user
             });
-        });
+            comment.save(err => {
+                if(err) return next(err);
+                next({
+                    message:"发表成功！",
+                    status:200
+                });
+            });
+        }catch(err){
+            next(err);
+        }
+    });
 });
 //删除评论
 router.post("/delComment",isLogin,(req,res,next) => {
     CommentModel.findOne({_id:req.body.id},(err2,doc2) => {
         try{
             if(err2) return next(err2);
-            if(req.user_id.toString() !== doc2.user.toString()){
+            if(req.user_id.toString() !== doc2.userBy.toString()){
                 return next({
                     message:"用户信息不匹配！",
                     status:400
@@ -219,7 +229,7 @@ router.post("/comments",(req,res,next) => {
     };
     let page = req.body.page || 1;
     let size = Number(req.body.size || 20);
-    pageQuery.normal(page,size,{},CommentModel,{path:"user",select:["nickname","headImg"]},query,{createTime:-1}).then(arr => {
+    pageQuery.normal(page,size,{user:0},CommentModel,{path:"userBy",select:["nickname","headImg"]},query,{good:-1}).then(arr => {
         next({
             message:"成功！",
             status:200,

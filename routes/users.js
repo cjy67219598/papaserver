@@ -345,6 +345,60 @@ router.post("/collections",isLogin,(req,res,next) => {
         next(err);
     });
 });
+//未读评论条数
+router.post("/unRead",isLogin,(req,res,next) => {
+    CommentModel.count({
+        user:req.user_id,
+        isRead:false
+    }).exec((err,count) => {
+        if(err) return next(err);
+        next({
+            message:"成功",
+            status:200,
+            data:count
+        });
+    });
+});
+//未读状态变更
+router.post("/read",isLogin,(req,res,next) => {
+    CommentModel.update({
+        user:req.user_id
+    },{
+        isRead:true
+    },{
+        multi:true  //更新全部查询结果
+    },(err,doc) => {
+        if(err) return next(err);
+        next({
+            message:"成功",
+            status:200
+        });
+    });
+});
+//最新评论
+router.post("/comments",isLogin,(req,res,next) => {
+    let query = {
+        user:req.user_id
+    };
+    let page = req.body.page || 1;
+    let size = Number(req.body.size || 20);
+    pageObj.normal(page,size,{},CommentModel,[{
+        path:"article",
+        select:["title"]
+    },{
+        path:"userBy",
+        select:["nickname"]
+    }],query,{createTime:-1}).then(data => {
+        next({
+            message:"成功",
+            status:200,
+            page:data[0],
+            data:data[1]
+        });
+    }).catch(err => {
+        next(err);
+    })
+});
 
 
 module.exports = router;

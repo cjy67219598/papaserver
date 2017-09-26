@@ -26,6 +26,10 @@ let CommentSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Article"
     },
+    userBy: {
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    },
     user: {
         type: Schema.Types.ObjectId,
         ref: "User"
