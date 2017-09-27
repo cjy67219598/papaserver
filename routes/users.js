@@ -399,6 +399,30 @@ router.post("/comments",isLogin,(req,res,next) => {
         next(err);
     })
 });
+//我的评论
+router.post("/myComments",isLogin,(req,res,next) => {
+    let query = {
+        userBy:req.user_id
+    };
+    let page = req.body.page || 1;
+    let size = Number(req.body.size || 20);
+    pageObj.normal(page,size,{},CommentModel,[{
+        path:"article",
+        select:["title"]
+    },{
+        path:"userBy",
+        select:["nickname"]
+    }],query,{createTime:-1}).then(data => {
+        next({
+            message:"成功",
+            status:200,
+            page:data[0],
+            data:data[1]
+        });
+    }).catch(err => {
+        next(err);
+    })
+});
 
 
 module.exports = router;
