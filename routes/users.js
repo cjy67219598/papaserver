@@ -200,7 +200,6 @@ router.post("/edit",isLogin,(req,res,next) => {
     UserModel.findOne({username:req.cookies.username},(err,doc) => {
         try{
             if(err) return next(err);
-            typeof req.body.password !== "undefined" && (doc.password = req.body.password);
             typeof req.body.tel !== "undefined" && (doc.tel = req.body.tel);
             typeof req.body.email !== "undefined" && (doc.email = req.body.email);
             typeof req.body.nickname !== "undefined" && (doc.nickname = req.body.nickname);
@@ -223,6 +222,48 @@ router.post("/edit",isLogin,(req,res,next) => {
             next(err);
         }
     });
+});
+//用户信息
+router.post("/userInfo",(req,res,next) => {
+    let query;
+    if(req.body.id){
+        query = {
+            _id:req.body.id
+        };
+    }else{
+        query = {
+          username:req.cookies.username
+        };
+    }
+    UserModel.findOne(query).select({
+        username:0,
+        password:0,
+        following:0
+    }).exec((err,doc) => {
+        if(err) return next(err);
+        next({
+            message:"成功",
+            status:200,
+            data:doc
+        })
+    });
+});
+//修改密码
+router.post("/rePassword",isLogin,(req,res,next) => {
+    if(req.body.oldPassword === req.user_info.password){
+        UserModel.update({_id:req.user_id},{password:req.body.newPassword},(err,doc) => {
+            if(err) return next(err);
+            next({
+                message:"密码修改成功!",
+                status:200
+            });
+        });
+    }else{
+        next({
+            message:"原密码输入错误",
+            status:400
+        });
+    }
 });
 //收藏文章
 router.post("/collect",isLogin,(req,res,next) => {

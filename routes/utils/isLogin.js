@@ -11,6 +11,7 @@ module.exports = (req, res, next) => {//检测用户是否登录的中间件
                     next(err);
                 }else if(req.cookies.password === doc.password){
                     req.user_id = doc._id;
+                    req.user_info = doc;
                     next();
                 }else{
                     err = new Error("用户登陆信息有误！");
